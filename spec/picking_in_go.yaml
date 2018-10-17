@@ -259,6 +259,12 @@ components:
         unitofmeasure:
           type: string
           example: mm
+        size:
+          type: string
+        fabric:
+          type: string
+        colour:
+          type: string
         barcodes:
           $ref: '#/components/schemas/ArrayOfBarcode'
       type: object
