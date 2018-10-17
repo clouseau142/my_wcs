@@ -258,7 +258,7 @@ components:
           example: 3000
         unitofmeasure:
           type: string
-          example: mm
+          example: km
         barcodes:
           $ref: '#/components/schemas/ArrayOfBarcode'
       type: object
