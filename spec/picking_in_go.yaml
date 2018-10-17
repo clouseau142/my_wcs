@@ -1,0 +1,286 @@
+openapi: 3.0.0
+# Added by API Auto Mocking Plugin
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/MyWHOrg/picking_in_go/1.0.0
+info:
+  description: This is a simple API
+  version: "1.0.0"
+  title: Simple Picking API
+  contact:
+    email: frank_o@your-company.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: WMS
+    description: calls made by the WMS to send data
+  - name: internal
+    description: internal available operations
+paths:
+  /orders:
+    get:
+      tags:
+        - WMS
+      summary: searches orders the system
+      description: By passing in the appropriate options, you can search for
+        certain batches in the system
+      operationId: searchOrders
+      parameters:
+        - in: query
+          name: searchString
+          description: pass an optional search string for looking up orders
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: skip
+          description: number of records to skip for pagination
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+        - in: query
+          name: limit
+          description: maximum number of records to return
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            maximum: 50
+      responses:
+        '200':
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '400':
+          description: bad input parameter
+  /order/{orderId}:
+    get:
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            items:
+              $ref: '#/components/schemas/Order/properties/orderId'
+      tags:
+        - WMS
+      summary: searches one specific order
+      description: By passing in the appropriate options, you can search for
+        certain batches in the system
+      operationId: searchSingleOrder
+      responses:
+        '200':
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompleteOrder'
+        '400':
+          description: bad input parameter
+        '404':
+          description: not found
+  /order/{orderId}/pickrequests:
+    get:
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            items:
+              $ref: '#/components/schemas/Order/properties/orderId'
+      tags:
+        - WMS
+      summary: searches all pickrequests within an order and returns the pickrequests
+      description: By passing in the appropriate options, you can search in the system
+      operationId: searchPickRequests
+      responses:
+        '200':
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pickrequest'
+        '400':
+          description: bad input parameter
+  /order/{orderId}/pickrequest/{pickId}:
+    get:
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            items:
+              $ref: '#/components/schemas/Order/properties/orderId'
+        - in: path
+          name: pickId
+          required: true
+          schema:
+            items:
+              $ref: '#/components/schemas/Pickrequest/properties/pickrequestId'
+      tags:
+        - WMS
+      summary: searches one specific pickrequest within an order and returns the pickrequest
+      description: By passing in the appropriate options, you can search in the system
+      operationId: searchSinglePickRequest
+      responses:
+        '200':
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pickrequest'
+        '400':
+          description: bad input parameter
+  /order: 
+    post:
+      tags:
+        - WMS
+      summary: adds an order to the system
+      description: adds an order
+      operationId: addOrder
+      responses:
+        '201':
+          description: order created
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: an order already exists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+        description: order to be added to batch
+  /order/{orderId}/pickrequest: 
+    post:
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            $ref: '#/components/schemas/Order/properties/orderId'
+      tags: 
+        - WMS
+      summary: adds a pick to an order
+      description: adds a pickrequest to an order
+      operationId: addPickrequestToOrder
+      responses:
+        '201':
+          description: pickrequest created
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: an item already exists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pickrequests'
+        description: pick to be added to an order
+components:
+  schemas:
+    Order:
+      required:
+        - orderId
+        - priority
+        - label
+        - releaseDate
+      properties:
+        orderId:
+          type: string
+          description: identifier for HOST
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        status:
+          type: string
+          example: received
+        label:
+          type: string
+          example: Widget Adapter
+        priority:
+          type: number
+        releaseDate:
+          type: string
+          format: date-time
+          example: '2016-08-29T09:12:33.001Z'
+      type: object
+    Pickrequest:
+      required:
+        - pickrequestId
+        - orderId
+        - sku
+        - label
+        - description
+        - expectedquantity
+      properties:
+        pickrequestId:
+          type: string
+          description: identifier for HOST
+          example: ACME Corporation
+        orderId:
+          $ref: '#/components/schemas/Order/properties/orderId'
+        status:
+          type: string
+          example: received
+        label:
+          type: string
+          example: 4711
+        sku:
+          $ref: '#/components/schemas/Sku'
+        expectedquantity:
+          type: number
+          example: 120
+        sortedquantity:
+          type: number
+          example: 120
+      type: object
+    Sku:
+      required:
+        - skuId
+      properties:
+        skuId:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+          example: Gurke
+        weight:
+          type: number
+          example: 1234
+        volume:
+          type: number
+          example: 3000
+        unitofmeasure:
+          type: string
+          example: mm
+        barcodes:
+          $ref: '#/components/schemas/ArrayOfBarcode'
+      type: object
+    ArrayOfBarcode:
+      items: 
+        type: string
+      example: [1230432134222, 1230432134223, 1230432134224]
+      minItems: 1
+      type: array
+    Pickrequests:
+      properties:
+        pickrequest:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pickrequest'
+      type: object
+    CompleteOrder:
+      properties:
+        order:
+          $ref: '#/components/schemas/Order'
+        orderlines:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pickrequest'
+      type: object
